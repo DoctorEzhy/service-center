@@ -1,6 +1,16 @@
-package impl;
+package dao.impl;
 
-public class PartDAOImpl implements PartDAO {
+import dao.PartDAO;
+import model.Part;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public abstract class PartDAOImpl implements PartDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(PartDAOImpl.class);
 
@@ -8,7 +18,7 @@ public class PartDAOImpl implements PartDAO {
     public void save(Part part) {
         String sql = "INSERT INTO parts(name, quantity, price) VALUES (?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = util.DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, part.getName());
@@ -27,7 +37,7 @@ public class PartDAOImpl implements PartDAO {
         String sql = "SELECT * FROM parts WHERE name LIKE ?";
         List<Part> parts = new ArrayList<>();
 
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = util.DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, "%" + name + "%");
@@ -48,4 +58,21 @@ public class PartDAOImpl implements PartDAO {
 
         return parts;
     }
+
+    @Override
+    public void delete(Long id) {
+        String sql = "DELETE FROM parts WHERE id = ?";
+
+        try (Connection conn = util.DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            logger.error("Ошибка удаления запчасти", e);
+        }
+    }
+
+    // Остальные методы интерфейса (findById, findAll, update, delete) тоже реализуй аналогично
 }
